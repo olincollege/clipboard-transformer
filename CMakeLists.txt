@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.22)
 
 # TODO: Define a good project in the line below. If applicable, list other
 # languages in this project managed by CMake.
-project(ProjectTitle
+project(clipboard_transformer
   VERSION 1.0
   LANGUAGES C
 )
@@ -46,5 +46,7 @@ add_subdirectory(src)
 include(CTest)
 find_library(CRITERION criterion REQUIRED)
 set(CRITERION_FLAGS --verbose -j1)
+
+add_executable(clipboard_transformer src/overlay.c)
 
 add_subdirectory(test)

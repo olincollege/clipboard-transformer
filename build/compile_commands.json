@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/Users/anmolsandhu/github/courses/clipboard-transformer/build",
+  "command": "/usr/bin/clang \n  -Wall   -Wextra   -pedantic   -Wconversion   -Wdouble-promotion   -Wduplicated-branches   -Wduplicated-cond   -Wimplicit-fallthrough   -Wlogical-op   -Wmisleading-indentation   -Wnull-dereference   -Wshadow   -Wsign-conversion   -Wunreachable-code   -Wunused   -Wuseless-cast   -g  -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk -o CMakeFiles/clipboard_transformer.dir/src/overlay.c.o -c /Users/anmolsandhu/github/courses/clipboard-transformer/src/overlay.c",
+  "file": "/Users/anmolsandhu/github/courses/clipboard-transformer/src/overlay.c",
+  "output": "CMakeFiles/clipboard_transformer.dir/src/overlay.c.o"
+}
+]
