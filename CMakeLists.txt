@@ -50,3 +50,12 @@ set(CRITERION_FLAGS --verbose -j1)
 add_executable(clipboard_transformer src/overlay.c)
 
 add_subdirectory(test)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTK REQUIRED gtk+-3.0)
+
+include_directories(${GTK_INCLUDE_DIRS})
+link_directories(${GTK_LIBRARY_DIRS})
+add_definitions(${GTK_CFLAGS_OTHER})
+
+target_link_libraries(clipboard_transformer ${GTK_LIBRARIES})
