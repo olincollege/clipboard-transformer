@@ -1,10 +1,5 @@
 #include <gtk/gtk.h>
 
-static void show_overlay(GtkWidget* widget, gpointer data) {
-  GtkWindow* window = GTK_WINDOW(data);
-  gtk_widget_show_all(GTK_WIDGET(window));
-}
-
 static void create_overlay(GtkWindow* window) {
   // Create a box to hold the overlay
   GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -12,16 +7,8 @@ static void create_overlay(GtkWindow* window) {
 
   // Create the search entry
   GtkWidget* search_entry = gtk_entry_new();
-  gtk_box_pack_start(GTK_BOX(box), search_entry, FALSE, FALSE, 0);
-
-  // Connect the search entry to a keyboard shortcut
-  GtkAccelGroup* accel_group = gtk_accel_group_new();
-  gtk_window_add_accel_group(GTK_WINDOW(window), accel_group);
-  guint keyval = GDK_KEY_space;
-  GdkModifierType modifier = GDK_CONTROL_MASK | GDK_SHIFT_MASK;
-  gtk_widget_add_accelerator(search_entry, "activate", accel_group, keyval,
-                             modifier, GTK_ACCEL_VISIBLE);
-  g_signal_connect(search_entry, "activate", G_CALLBACK(show_overlay), window);
+  gtk_box_pack_start(GTK_BOX(box), search_entry, FALSE, FALSE,
+                     0);  // pack search entry as first element from top in box
 
   // Create the results list
   GtkListStore* store = gtk_list_store_new(1, G_TYPE_STRING);
@@ -47,19 +34,19 @@ static void create_overlay(GtkWindow* window) {
     char* text = g_strdup_printf("Result %d", i);
     gtk_list_store_set(store, &iter, 0, text, -1);
   }
-
-  // Show the overlay
-  gtk_widget_show_all(box);
 }
 
 int main(int argc, char* argv[]) {
   gtk_init(&argc, &argv);
 
+  gint window_height = 200;
+  gint window_width = 400;
   // Create the window
-  GtkWidget* window = gtk_window_new(GTK_WINDOW_POPUP);
+  GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
   gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_DOCK);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_default_size(GTK_WINDOW(window), 400, 200);
+  gtk_window_set_default_size(GTK_WINDOW(window), window_width, window_height);
 
   // Create the overlay
   create_overlay(window);
