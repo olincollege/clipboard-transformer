@@ -32,16 +32,21 @@ static void create_overlay(GtkWindow* window) {
   GtkTreeViewColumn* column = gtk_tree_view_column_new_with_attributes(
       NULL, renderer, "text", 0, NULL);  // Set the column title to NULL
   gtk_tree_view_append_column(tree_view, column);
-  gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(tree_view), TRUE, TRUE, 0);
+
+  // Create a scrolled window and add the tree view to it
+  GtkWidget* scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+                                 GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(tree_view));
+  gtk_box_pack_start(GTK_BOX(box), scrolled_window, TRUE, TRUE, 0);
 
   // Add some sample results to the list
   GtkTreeIter iter;
-  gtk_list_store_append(store, &iter);
-  gtk_list_store_set(store, &iter, 0, "Search Result 1", -1);
-  gtk_list_store_append(store, &iter);
-  gtk_list_store_set(store, &iter, 0, "Search Result 2", -1);
-  gtk_list_store_append(store, &iter);
-  gtk_list_store_set(store, &iter, 0, "Search Result 3", -1);
+  for (int i = 0; i < 20; i++) {
+    gtk_list_store_append(store, &iter);
+    char* text = g_strdup_printf("Result %d", i);
+    gtk_list_store_set(store, &iter, 0, text, -1);
+  }
 
   // Show the overlay
   gtk_widget_show_all(box);
@@ -65,5 +70,3 @@ int main(int argc, char* argv[]) {
   gtk_main();
   return 0;
 }
-
-// add auto-resizing to menu depending on the number of items
