@@ -1,5 +1,25 @@
 #include <gtk/gtk.h>
 
+// Define a callback function to filter the results
+static void filter_results(GtkEntry* entry, GtkListStore* store) {
+  // Get the text entered in the search entry
+  const char* search_text = gtk_entry_get_text(entry);
+
+  // Clear the current results in the list store
+  gtk_list_store_clear(store);
+
+  // Add the filtered results to the list store
+  GtkTreeIter iter;
+  for (int i = 0; i < 20; i++) {
+    char* text = g_strdup_printf("Result %d", i);
+    if (g_strstr_len(text, -1, search_text) != NULL) {
+      gtk_list_store_append(store, &iter);
+      gtk_list_store_set(store, &iter, 0, text, -1);
+    }
+    g_free(text);
+  }
+}
+
 static void create_overlay(GtkWindow* window) {
   // Create a box to hold the overlay
   GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -34,6 +54,9 @@ static void create_overlay(GtkWindow* window) {
     char* text = g_strdup_printf("Result %d", i);
     gtk_list_store_set(store, &iter, 0, text, -1);
   }
+
+  // Connect the "changed" signal of the search entry to the filter_results callback
+  g_signal_connect(search_entry, "changed", G_CALLBACK(filter_results), store);
 }
 
 int main(int argc, char* argv[]) {
