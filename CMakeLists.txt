@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.22)
 
 # TODO: Define a good project in the line below. If applicable, list other
 # languages in this project managed by CMake.
-project(ProjectTitle
+project(clipboard_transformer
   VERSION 1.0
   LANGUAGES C
 )
@@ -47,4 +47,15 @@ include(CTest)
 find_library(CRITERION criterion REQUIRED)
 set(CRITERION_FLAGS --verbose -j1)
 
+add_executable(clipboard_transformer src/overlay.c)
+
 add_subdirectory(test)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTK REQUIRED gtk+-3.0)
+
+include_directories(${GTK_INCLUDE_DIRS})
+link_directories(${GTK_LIBRARY_DIRS})
+add_definitions(${GTK_CFLAGS_OTHER})
+
+target_link_libraries(clipboard_transformer ${GTK_LIBRARIES})
