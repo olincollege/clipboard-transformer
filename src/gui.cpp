@@ -1,7 +1,29 @@
+#include "gui.h"
 #include <gtk/gtk.h>
 
+void start_gui(int argc, char* argv[]) {
+  gtk_init(&argc, &argv);
+
+  gint window_height = 200;
+  gint window_width = 400;
+  // Create the window
+  GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
+  gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_DOCK);
+  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER_ALWAYS);
+  gtk_window_set_default_size(GTK_WINDOW(window), window_width, window_height);
+
+  // Create the overlay
+  create_overlay(window);
+
+  // Show the window
+  gtk_widget_show_all(window);
+
+  gtk_main();
+}
+
 // Define a callback function to filter the results
-static void filter_results(GtkEntry* entry, GtkListStore* store) {
+void filter_results(GtkEntry* entry, GtkListStore* store) {
   // Get the text entered in the search entry
   const char* search_text = gtk_entry_get_text(entry);
 
@@ -20,7 +42,7 @@ static void filter_results(GtkEntry* entry, GtkListStore* store) {
   }
 }
 
-static void create_overlay(GtkWindow* window) {
+void create_overlay(GtkWidget* window) {
   // Create a box to hold the overlay
   GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_add(GTK_CONTAINER(window), box);
@@ -57,26 +79,4 @@ static void create_overlay(GtkWindow* window) {
 
   // Connect the "changed" signal of the search entry to the filter_results callback
   g_signal_connect(search_entry, "changed", G_CALLBACK(filter_results), store);
-}
-
-int main(int argc, char* argv[]) {
-  gtk_init(&argc, &argv);
-
-  gint window_height = 200;
-  gint window_width = 400;
-  // Create the window
-  GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
-  gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_DOCK);
-  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER_ALWAYS);
-  gtk_window_set_default_size(GTK_WINDOW(window), window_width, window_height);
-
-  // Create the overlay
-  create_overlay(window);
-
-  // Show the window
-  gtk_widget_show_all(window);
-
-  gtk_main();
-  return 0;
 }

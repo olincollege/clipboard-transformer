@@ -4,14 +4,22 @@ cmake_minimum_required(VERSION 3.22)
 
 # TODO: Define a good project in the line below. If applicable, list other
 # languages in this project managed by CMake.
-project(clipboard_transformer
-  VERSION 1.0
-  LANGUAGES C
-)
+if(APPLE)
+    project(clipboard_transformer
+      VERSION 1.0
+      LANGUAGES CXX OBJC
+    )
+else()
+    project(clipboard_transformer
+      VERSION 1.0
+      LANGUAGES CXX
+    )
+endif()
 
 # Use the latest C standard supported by Clang and LLVM in the latest LTS
 # version of Ubuntu.
 set(CMAKE_C_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_C_FLAGS "
   -Wall \
@@ -35,10 +43,7 @@ set(CMAKE_C_FLAGS "
 
 # No options are set here because the configuration is set in .clang-tidy
 # instead. If that file is not present, clang-tidy will be of limited help.
-set(CMAKE_C_CLANG_TIDY "clang-tidy")
-
-# Include the source files.
-add_subdirectory(src)
+#set(CMAKE_C_CLANG_TIDY "clang-tidy")
 
 # In current courses that teach C, we use the Criterion testing framework. If
 # If you want to use a different framework, or if you want to skip testing
@@ -47,15 +52,14 @@ include(CTest)
 find_library(CRITERION criterion REQUIRED)
 set(CRITERION_FLAGS --verbose -j1)
 
-add_executable(clipboard_transformer src/overlay.c)
-
-add_subdirectory(test)
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK REQUIRED gtk+-3.0)
 
 include_directories(${GTK_INCLUDE_DIRS})
 link_directories(${GTK_LIBRARY_DIRS})
 add_definitions(${GTK_CFLAGS_OTHER})
+
+# Include the source files.
+add_subdirectory(src)
 
 target_link_libraries(clipboard_transformer ${GTK_LIBRARIES})
