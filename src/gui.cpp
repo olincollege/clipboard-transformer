@@ -1,14 +1,14 @@
 #include "gui.h"
 #include <gtk/gtk.h>
 
-void start_gui(int argc, char* argv[]) {
+GtkWidget* start_gui(int argc, char* argv[]) {
   gtk_init(&argc, &argv);
 
   gint window_height = 200;
   gint window_width = 400;
   // Create the window
   GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_decorated(GTK_WINDOW(window), FALSE);
+  gtk_window_set_decorated(GTK_WINDOW(window), FALSE); // hide top bar
   gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_DOCK);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER_ALWAYS);
   gtk_window_set_default_size(GTK_WINDOW(window), window_width, window_height);
@@ -18,8 +18,46 @@ void start_gui(int argc, char* argv[]) {
 
   // Show the window
   gtk_widget_show_all(window);
+  return window;
+}
 
-  gtk_main();
+void close_error_screen(GtkWidget* widget, gpointer data) {
+  GtkWidget* window = (GtkWidget*)data;
+  gtk_widget_destroy(window);
+}
+
+void show_error_screen(GtkWidget* parent_window, const char* error_message) {
+  // Create the window
+  GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_decorated(GTK_WINDOW(window), FALSE); // hide top bar
+  gtk_window_set_modal(GTK_WINDOW(window), TRUE); // model window for alert
+  gtk_window_set_transient_for(GTK_WINDOW(window), GTK_WINDOW(parent_window)); // link to parent window
+  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER_ON_PARENT);
+  // set default size equal to parent window
+  gtk_window_set_default_size(GTK_WINDOW(window),
+                              gtk_widget_get_allocated_width(parent_window),
+                              gtk_widget_get_allocated_height(parent_window));
+
+  // Create a box to hold the overlay
+  GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  gtk_container_add(GTK_CONTAINER(window), box);
+
+  // Create the error message label
+  GtkWidget* label = gtk_label_new(error_message);
+  gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
+
+  // Create the close button
+  GtkWidget* close_button = gtk_button_new_with_label("Close");
+  g_signal_connect(close_button, "clicked", G_CALLBACK(close_error_screen),
+                   window);
+  gtk_box_pack_end(GTK_BOX(box), close_button, FALSE, FALSE, 0);
+
+  // Show the window
+  gtk_widget_show_all(window);
+
+  while (gtk_events_pending()) {
+    gtk_main_iteration_do(FALSE);
+  }
 }
 
 // Define a callback function to filter the results
