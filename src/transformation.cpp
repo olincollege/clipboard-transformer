@@ -11,7 +11,7 @@ Transformation::Transformation(std::string name, std::filesystem::path path) {
   this->path = path;
 }
 
-TransformationResult Transformation::transform(std::string input) {
+TransformationResult* Transformation::transform(std::string* input) {
   int stdin_pipe[2], stdout_pipe[2], stderr_pipe[2];
   pipe(stdin_pipe);
   pipe(stdout_pipe);
@@ -19,8 +19,11 @@ TransformationResult Transformation::transform(std::string input) {
 
   pid_t pid = fork();
 
+  TransformationResult* result = new TransformationResult();
+
   if (pid == -1) {
-    return TransformationResult{"fork() failed", -1};
+    result->output = "failed to fork";
+    result->exitCode = 1;
   }
 
   if (pid == 0) {
@@ -51,7 +54,7 @@ TransformationResult Transformation::transform(std::string input) {
     close(stderr_pipe[1]);
 
     // write our input to its stdin pipe
-    write(stdin_pipe[1], input.c_str(), input.size());
+    write(stdin_pipe[1], input->c_str(), input->size());
     close(stdin_pipe[1]);  // sends EOF
 
     // wait for child to finish
@@ -73,6 +76,9 @@ TransformationResult Transformation::transform(std::string input) {
     close(stdout_pipe[0]);
     close(stderr_pipe[0]);
 
-    return TransformationResult{output, exit_status};
+    result->output = output;
+    result->exitCode = exit_status;
   }
+
+  return result;
 }

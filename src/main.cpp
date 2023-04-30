@@ -5,25 +5,25 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ClipboardHelper/ClipboardHelper.h"
+#if __APPLE__
+#include "DarwinClipboardHelper/DarwinClipboardHelper.h"
+#endif
+
+#include "clip/clip.h"
 #include "gui.h"
 #include "transformation.h"
 
 namespace fs = std::filesystem;
 
 int main(int argc, char* argv[]) {
-  std::string input = "";
+  std::string input("");
 
-  // read the clipboard
-  std::string filePath = ClipboardHelper::getFilePath();
-  std::string url = ClipboardHelper::getURL();
-  std::string text = ClipboardHelper::getString();
-
+#if __APPLE__
   // if there is a file path, read the file
+  std::string filePath = ClipboardHelper::getFilePath();
   if (!filePath.empty()) {
     std::ifstream input_file;
     input_file.open(filePath.substr(7));
-    input = "";
 
     if (!input_file.is_open()) {
       std::cerr << "could not open " + filePath << std::endl;
@@ -37,10 +37,11 @@ int main(int argc, char* argv[]) {
 
     input_file.close();
   } else {
-    if (!text.empty()) {
-      input = text;
-    }
+    input = ClipboardHelper::getString();
   }
+#else
+  input = clip::get_text(input);
+#endif
 
   if (input.empty()) {
     std::cerr << "no input" << std::endl;
@@ -56,7 +57,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  std::unordered_map<std::string, Transformation*> txfnMap;
+  TransformationMapPtr txfnMap = std::make_shared<TransformationMap>();
   for (const auto& p : fs::directory_iterator(txfnPath)) {
     if (!p.is_regular_file()) {
       continue;
@@ -65,17 +66,17 @@ int main(int argc, char* argv[]) {
     }
     Transformation* t =
         new Transformation(p.path().filename().string(), p.path());
-    txfnMap[t->name] = t;
+    (*txfnMap)[t->name] = t;
   }
 
   // print transformations
-  if (txfnMap.size() < 1) {
+  if (txfnMap->size() < 1) {
     std::cout << "no transformations found" << std::endl;
     return 0;
   }
 
   // select transformation, for now just uppercase
-  Transformation* selected_txfn = txfnMap["uppercase"];
+  Transformation* selected_txfn = (*txfnMap)["uppercase"];
 
   if (!selected_txfn) {
     std::cout << "no transformation selected" << std::endl;
@@ -83,16 +84,19 @@ int main(int argc, char* argv[]) {
   }
 
   // run transformation
-  TransformationResult output = selected_txfn->transform(input);
+  TransformationResult* output = selected_txfn->transform(&input);
 
   // handle output
-  if (output.exitCode != 0) {
-    std::cout << "transformation failed with exit code " << output.exitCode
+  if (output->exitCode != 0) {
+    std::cout << "transformation failed with exit code " << output->exitCode
               << std::endl;
     return 1;
   }
 
-  ClipboardHelper::setString(output.output);
+  clip::set_text(output->output);
+
+  // free output
+  delete output;
 
   // not freeing txfnMap because it lives as long as the program
   return 0;

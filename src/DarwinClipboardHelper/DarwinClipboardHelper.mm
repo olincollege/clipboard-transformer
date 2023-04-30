@@ -1,7 +1,7 @@
 // ClipboardHelper.mm
-#import <AppKit/AppKit.h>  // import is for obj-c only
+#include "DarwinClipboardHelper.h"
 
-#include "ClipboardHelper.h"
+#import <AppKit/AppKit.h>  // import is for obj-c only
 
 // https://developer.apple.com/documentation/appkit/nspasteboard
 
