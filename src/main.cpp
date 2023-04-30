@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
     input = ClipboardHelper::getString();
   }
 #else
-  input = clip::get_text(input);
+  clip::get_text(input);
 #endif
 
   if (input.empty()) {

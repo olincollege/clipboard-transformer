@@ -6,6 +6,10 @@
 #include <iostream>
 #include <string>
 
+#if !__APPLE__
+#include <sys/wait.h> // macOS doesn't need this import, it's in unistd.h
+#endif
+
 Transformation::Transformation(std::string name, std::filesystem::path path) {
   this->name = name;
   this->path = path;
