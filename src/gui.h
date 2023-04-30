@@ -1,5 +1,8 @@
 #pragma once
 #include <gtk/gtk.h>
+#include <unordered_map>
+#include "transformation.h"
+#include "clip/clip.h"
 
 /**
  * @brief Start the GUI
@@ -8,9 +11,8 @@
  * 
  * @param argc The number of command line arguments
  * @param argv The command line arguments
- * @return GtkWidget* 
  */
-GtkWidget* start_gui(int argc, char* argv[]);
+void start_gui(int argc, char* argv[], std::shared_ptr<TransformationMap> txfnMap, std::string input);
 
 /**
  * @brief Create the overlay
@@ -20,7 +22,7 @@ GtkWidget* start_gui(int argc, char* argv[]);
  * 
  * @param window The window to add the overlay to
  */
-void create_overlay(GtkWidget* window);
+void create_overlay(GtkWidget* window, std::shared_ptr<TransformationMap> txfnMap, std::string input);
 
 /**
  * @brief Filter the results
@@ -30,7 +32,7 @@ void create_overlay(GtkWidget* window);
  * @param overlay Pointer to the search bar which triggered the callback
  * @return GtkWidget* 
  */
-void filter_results(GtkEntry* entry, GtkListStore* store);
+void filter_results(GtkEntry* entry, gpointer data);
 
 /**
  * @brief Show the error screen
