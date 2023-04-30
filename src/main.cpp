@@ -69,6 +69,8 @@ int main(int argc, char* argv[]) {
     (*txfnMap)[t->name] = t;
   }
 
+  start_gui(argc, argv, txfnMap, input);
+
   // print transformations
   if (txfnMap->size() < 1) {
     std::cout << "no transformations found" << std::endl;
