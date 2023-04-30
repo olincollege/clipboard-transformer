@@ -4,17 +4,17 @@ cmake_minimum_required(VERSION 3.22)
 
 # TODO: Define a good project in the line below. If applicable, list other
 # languages in this project managed by CMake.
-if(APPLE)
+if (APPLE)
     project(clipboard_transformer
-      VERSION 1.0
-      LANGUAGES CXX OBJC
-    )
-else()
+            VERSION 1.0
+            LANGUAGES CXX OBJC
+            )
+else ()
     project(clipboard_transformer
-      VERSION 1.0
-      LANGUAGES CXX
-    )
-endif()
+            VERSION 1.0
+            LANGUAGES CXX
+            )
+endif ()
 
 # Use the latest C standard supported by Clang and LLVM in the latest LTS
 # version of Ubuntu.
