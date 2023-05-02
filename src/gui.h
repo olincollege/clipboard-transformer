@@ -11,6 +11,8 @@
  * 
  * @param argc The number of command line arguments
  * @param argv The command line arguments
+ * @param txfnMap A pointer to the transformation map
+ * @param input The input string to pass to the transformations
  */
 void start_gui(int argc, char* argv[], std::shared_ptr<TransformationMap> txfnMap, std::string input);
 
@@ -21,6 +23,8 @@ void start_gui(int argc, char* argv[], std::shared_ptr<TransformationMap> txfnMa
  * add it to the window.
  * 
  * @param window The window to add the overlay to
+ * @param txfnMap A pointer to the transformation map
+ * @param input The input string to pass to the transformations
  */
 void create_overlay(GtkWidget* window, std::shared_ptr<TransformationMap> txfnMap, std::string input);
 
@@ -29,8 +33,8 @@ void create_overlay(GtkWidget* window, std::shared_ptr<TransformationMap> txfnMa
  * 
  * G_CALLBACK function to filter the results based on the search bar text.
  * 
- * @param overlay Pointer to the search bar which triggered the callback
- * @return GtkWidget* 
+ * @param entry Pointer to the search bar
+ * @param data Pointer to data passed to the callback
  */
 void filter_results(GtkEntry* entry, gpointer data);
 
