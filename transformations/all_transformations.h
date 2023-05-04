@@ -53,10 +53,17 @@ void nopunc();
  * Given a stream of text from standard input, convert the text to pig latin.
  * Return 0 if successful and 1 if it fails.
  *
- * @return int 0 if the operation is successful and 1 if the conversion failed.
+ * @return int 0 if the operation is successful and 1 if the conversion fails.
  */
 int oink();
 
+/**
+ * Given a stream of text from standard input that is in JSON notation, add the
+ * proper indentation to format it correctly. Return 0 if successful and 1 if it
+ * fails or the input is written in a valid JSON format.
+ *
+ * @return int o if the operation if succesful and 1 if the formatting fails.
+ */
 int cleanjson();
 
 int parsehtml();

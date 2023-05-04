@@ -10,7 +10,7 @@ int is_vowel(int c) {
 
 void new_line(int* indent_counter, int indent_change) {
   *indent_counter += indent_change;
-  puts("\r\n");
+  printf("\n");
   for (int i = 0; i < 2 * *indent_counter; ++i) {
     putchar(32);
   }
@@ -83,6 +83,92 @@ int oink() {
   return 0;
 }
 
-int cleanjson() { return 0; }
+int cleanjson() {
+  int c;
+  int num_indents = 0;
+  int num_open_square_braces = 0;
+  int num_open_curly_braces = 0;
+  int open_quotes = 0;
+
+  while ((c = getchar()) != EOF) {
+    switch (c) {
+      // white space or closed braces
+      case 32:
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+      case 13:
+      case 93:
+      case 125:
+        if (!open_quotes) break;
+
+      default:
+        putchar(c);
+        break;
+    }
+    switch (c) {
+      // open braces
+      case 91:
+        ++num_open_square_braces;
+        if (!open_quotes) new_line(&num_indents, 1);
+        break;
+
+      case 123:
+        ++num_open_curly_braces;
+        if (!open_quotes) new_line(&num_indents, 1);
+        break;
+
+      // closed braces
+      case 93:
+        --num_open_square_braces;
+        if (!open_quotes) {
+          new_line(&num_indents, -1);
+          putchar(c);
+        }
+        break;
+
+      case 125:
+        --num_open_curly_braces;
+        if (!open_quotes) {
+          new_line(&num_indents, -1);
+          putchar(c);
+        }
+        break;
+
+      // comma
+      case 44:
+        if (!open_quotes) new_line(&num_indents, 0);
+        break;
+
+      // colon
+      case 58:
+        if (!open_quotes) putchar(32);
+        break;
+
+      // quote
+      case 34:
+        if (open_quotes)
+          open_quotes = 0;
+        else
+          open_quotes = 1;
+        break;
+
+      // backslash
+      case 92:
+        c = getchar();
+        putchar(c);
+        break;
+
+      default:
+        break;
+    }
+  }
+  if (!num_indents && !num_open_square_braces && !num_open_curly_braces &&
+      !open_quotes) {
+    return 0;
+  }
+  return 1;
+}
 
 int parsehtml() { return 0; }
