@@ -63,3 +63,9 @@ add_subdirectory(src)
 add_subdirectory(transformations)
 
 target_link_libraries(clipboard_transformer ${GTK_LIBRARIES})
+
+include(CTest)
+find_library(CRITERION criterion REQUIRED)
+set(CRITERION_FLAGS --verbose -j1)
+
+add_subdirectory(test)
