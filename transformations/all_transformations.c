@@ -1,6 +1,7 @@
 #include "all_transformations.h"
 
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 int is_vowel(int c) {
@@ -88,7 +89,7 @@ int cleanjson() {
   int num_indents = 0;
   int num_open_square_braces = 0;
   int num_open_curly_braces = 0;
-  int open_quotes = 0;
+  bool open_quotes = false;
 
   while ((c = getchar()) != EOF) {
     switch (c) {
@@ -149,9 +150,9 @@ int cleanjson() {
       // quote
       case 34:
         if (open_quotes)
-          open_quotes = 0;
+          open_quotes = false;
         else
-          open_quotes = 1;
+          open_quotes = true;
         break;
 
       // backslash
@@ -171,4 +172,47 @@ int cleanjson() {
   return 1;
 }
 
-int parsehtml() { return 0; }
+int parsehtml() {
+  int c;
+  int num_open_brackets = 0;
+  bool in_paragraph = false;
+  bool output_content = false;
+  while ((c = getchar()) != EOF) {
+    switch (c) {
+      case 60:
+        ++num_open_brackets;
+        c = getchar();
+        if (c == 'p') {
+          in_paragraph = true;
+        } else if (c == '/') {
+          if ((c = getchar()) == 'p') {
+            in_paragraph = false;
+          }
+        }
+        continue;
+      case 62:
+        --num_open_brackets;
+        if (output_content && !in_paragraph) {
+          printf("\n\n");
+        }
+        output_content = false;
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+      case 13:
+        continue;
+      default:
+        break;
+    }
+    if (num_open_brackets) {
+      continue;
+    }
+    putchar(c);
+    output_content = true;
+  }
+  if (!num_open_brackets && !in_paragraph && !output_content) {
+    return 0;
+  }
+  return 1;
+}

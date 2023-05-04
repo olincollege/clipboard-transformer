@@ -2,6 +2,7 @@
 #include <criterion/new/assert.h>
 #include <criterion/redirect.h>
 #include <ctype.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -203,4 +204,58 @@ Test(cleanjson, invalid_json, .init = cr_redirect_stdout) {
   cr_assert_eq(ret, 1, "cleanjson returned %d", ret);
   (void)fflush(stdout);
   (void)fclose(stdout);
+}
+
+Test(parsehtml, simple_html, .init = cr_redirect_stdout) {
+  FILE* stdin_file = cr_get_redirected_stdin();
+  (void)fprintf(
+      stdin_file,
+      "<!DOCTYPE html>\n<html>\n<head>\n<title>My "
+      "Page</title>\n</head>\n<body>\n<h1>Welcome to my page!</h1>\n<p>This is "
+      "a sample paragraph.</p>\n<ul>\n<li>Item 1</li>\n<li>Item "
+      "2</li>\n<li>Item 3</li>\n</ul>\n</body>\n</html>");
+  (void)fclose(stdin_file);
+  int ret = parsehtml();
+  cr_assert_eq(ret, 0, "parsehtml returned %d", ret);
+  (void)fflush(stdout);
+  (void)fclose(stdout);
+  cr_assert_stdout_eq_str(
+      "My Page\n\nWelcome to my page!\n\nThis is a sample paragraph.\n\nItem "
+      "1\n\nItem 2\n\nItem 3\n\n");
+}
+
+Test(parsehtml, complex_paragraph, .init = cr_redirect_stdout) {
+  FILE* stdin_file = cr_get_redirected_stdin();
+  (void)fprintf(
+      stdin_file,
+      "<h1 style=\"color: red;\">Climactic Battle</h1><p>In a <b>climactic "
+      "battle</b>, Tito and Sparkle✨ defeated the <i>cake minions</i> and "
+      "consumed the 🍦 ice cream sundae, gaining <u>infinite knowledge and "
+      "power</u>.</p><p>They used their newfound abilities to turn Cosmic🚀 "
+      "Munchies🤤 into a <em>utopia</em>, spreading delicious food and joy "
+      "to all dimensions and creating an era of intergalactic "
+      "peace.</p>");
+  (void)fclose(stdin_file);
+  int ret = parsehtml();
+  cr_assert_eq(ret, 0, "parsehtml returned %d", ret);
+  (void)fflush(stdout);
+  (void)fclose(stdout);
+  cr_assert_stdout_eq_str(
+      "Climactic Battle\n\nIn a climactic battle, Tito and Sparkle✨ defeated "
+      "the cake minions and consumed the 🍦 ice cream sundae, gaining infinite "
+      "knowledge and power.\n\nThey used their newfound abilities to turn "
+      "Cosmic🚀 Munchies🤤 into a utopia, spreading delicious food and joy "
+      "to "
+      "all dimensions and creating an era of intergalactic peace.\n\n");
+}
+
+Test(parsehtml, invalid_html, .init = cr_redirect_stdout) {
+  FILE* stdin_file = cr_get_redirected_stdin();
+  (void)fprintf(stdin_file,
+                "<!DOCTYPE html><html><head><title>Short HTML "
+                "Example</title></head><body<h1>Welcome to my "
+                "website!</h1><p>Here is some example text.</p></body></html>");
+  (void)fclose(stdin_file);
+  int ret = parsehtml();
+  cr_assert_eq(ret, 1, "parsehtml returned %d", ret);
 }
