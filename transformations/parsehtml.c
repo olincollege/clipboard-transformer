@@ -2,4 +2,4 @@
 
 #include "all_transformations.h"
 
-int main() { parsehtml(); }
+int main() { return parsehtml(); }
