@@ -3,7 +3,4 @@
 
 #include "all_transformations.h"
 
-int main() {
-  nopunc();
-  return 0;
-}
+int main() { return oink(); }

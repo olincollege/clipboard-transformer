@@ -1,12 +1,9 @@
-#include <stdio.h>
 #include <ctype.h>
+#include <stdio.h>
+
+#include "all_transformations.h"
 
 int main() {
-  int c;
-
-  while ((c = getchar()) != EOF) {
-    putchar(toupper(c));
-  }
-
+  uppercase();
   return 0;
 }

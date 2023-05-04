@@ -1,13 +1,17 @@
+add_library(all_transformations all_transformations.c all_transformations.h)
+
 add_executable(cleanjson cleanjson.c)
-
 add_executable(lowercase lowercase.c)
-
 add_executable(uppercase uppercase.c)
-
 add_executable(noformat noformat.c)
-
 add_executable(nopunc nopunc.c)
-
 add_executable(oink oink.c)
-
 add_executable(parsehtml parsehtml.c)
+
+target_link_libraries(cleanjson all_transformations)
+target_link_libraries(lowercase all_transformations)
+target_link_libraries(uppercase all_transformations)
+target_link_libraries(noformat all_transformations)
+target_link_libraries(nopunc all_transformations)
+target_link_libraries(oink all_transformations)
+target_link_libraries(parsehtml all_transformations)
