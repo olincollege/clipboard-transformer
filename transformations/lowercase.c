@@ -1,12 +1,9 @@
 #include <ctype.h>
 #include <stdio.h>
 
+#include "all_transformations.c"
+
 int main() {
-  int c;
-
-  while ((c = getchar()) != EOF) {
-    putchar(tolower(c));
-  }
-
+  lowercase();
   return 0;
 }
