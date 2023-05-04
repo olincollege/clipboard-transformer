@@ -5,7 +5,7 @@
 void start_gui(int argc, char* argv[], std::shared_ptr<TransformationMap> txfnMap, std::string input) {
   gtk_init(&argc, &argv);
 
-  gint window_height = 200;
+  gint window_height = 220;
   gint window_width = 400;
   // Create the window
   GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -94,6 +94,9 @@ void select_transformation(GtkTreeView* tree_view, gpointer data) {
     gchar* name;
     gtk_tree_model_get(model, &iter, 0, &name, -1);
 
+    // print the selected transformation
+    std::cout << "Selected transformation: " << name << std::endl;
+
     // Get the stored pointer to the txfcMap object
     std::unordered_map<std::string, Transformation*>* txfcMap = reinterpret_cast<std::unordered_map<std::string, Transformation*>*>(
       g_object_get_data(G_OBJECT(store), "txfc_map"));
@@ -102,51 +105,64 @@ void select_transformation(GtkTreeView* tree_view, gpointer data) {
     std::string* input = reinterpret_cast<std::string*>(
       g_object_get_data(G_OBJECT(store), "input"));
 
-    auto txf_it = txfcMap->find(name);
-    if (txf_it != txfcMap->end()) {
-      // Transformation* selected_txfn = txf_it->second;
-      Transformation* selected_txfn = txfcMap->at(name);
+    // dereference txfcMap pointer and find selected transformation
+    Transformation* selected_txfn = (*txfcMap)[name];
 
-      // Run the selected transformation
-      TransformationResult* output = selected_txfn->transform(input);
+    // run transformation
+    TransformationResult* output = selected_txfn->transform(input);
 
-      // handle output
-      if (output->exitCode != 0) {
-        show_error_screen(gtk_widget_get_toplevel(GTK_WIDGET(tree_view)),
+    // print output
+    std::cout << "Output: " << output->output << std::endl;
+
+    if (output->exitCode != 0) {
+      show_error_screen(gtk_widget_get_toplevel(GTK_WIDGET(tree_view)),
                       ("Transformation failed with exit code " + std::to_string(output->exitCode) + "\n" + output->output).c_str());
-      } else {
-        clip::set_text(output->output);
-      }
-      delete output; 
+    } else {
+      clip::set_text(output->output);
     }
+    delete output;
     g_free(name);
   }
-  // kill gtk main loop
-  gtk_main_quit();
 }
 
-void overlay_destroyed(GtkWidget* overlay, gpointer data) {
-  GtkListStore* store = GTK_LIST_STORE(data);
-
-  // Free the input string and txfcMap pointers stored in the list store's object data
-  std::string* inputPtr = static_cast<std::string*>(g_object_get_data(G_OBJECT(store), "input"));
-  delete inputPtr;
-
-  // Loop through the txfcMap and delete all the Transformation objects
-  std::unordered_map<std::string, Transformation*>* txfcMapPtr =
-      static_cast<std::unordered_map<std::string, Transformation*>*>(g_object_get_data(G_OBJECT(store), "txfc_map"));
-  for (auto const& txfc : *txfcMapPtr) {
-    delete txfc.second;
-  }
-  delete txfcMapPtr;
-
-  gtk_widget_destroy(overlay);
-}
-
-void check_enter_key(GtkTreeView* tree_view, GdkEventKey* event, gpointer data) {
+void check_key_press(GtkTreeView* tree_view, GdkEventKey* event, gpointer data) {
   if (event->keyval == GDK_KEY_Return) {
+    GtkEntry* search_entry = GTK_ENTRY(g_object_get_data(G_OBJECT(data), "search_entry"));
+    gtk_entry_set_text(search_entry, "");
     // run select transformation callback
     select_transformation(tree_view, data);
+
+    // Get the label and set its text to "transformed!"
+    GtkWidget* label = GTK_WIDGET(g_object_get_data(G_OBJECT(data), "label"));
+    gtk_label_set_text(GTK_LABEL(label), "Transformed!");
+
+    // Set a timer to reset the label text after 1.5 seconds
+    g_timeout_add(1500, [](gpointer user_data) {
+        GtkWidget* label = GTK_WIDGET(user_data);
+        gtk_label_set_text(GTK_LABEL(label), "");
+        return G_SOURCE_REMOVE;
+    }, label);
+  } else if (event->keyval == GDK_KEY_Down) {
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(tree_view);
+    GtkTreeModel* model;
+    GtkTreeIter iter;
+    if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
+      // get the next iter
+      if (gtk_tree_model_iter_next(model, &iter)) {
+        gtk_tree_selection_select_iter(selection, &iter);
+      }
+    }
+  }
+  else if (event->keyval == GDK_KEY_Up) {
+    GtkTreeSelection* selection = gtk_tree_view_get_selection(tree_view);
+    GtkTreeModel* model;
+    GtkTreeIter iter;
+    if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
+      // get the previous iter
+      if (gtk_tree_model_iter_previous(model, &iter)) {
+        gtk_tree_selection_select_iter(selection, &iter);
+      }
+    }
   }
 }
 
@@ -155,10 +171,20 @@ void create_overlay(GtkWidget* window, std::shared_ptr<TransformationMap> txfcMa
   GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_add(GTK_CONTAINER(window), box);
 
+  // Create a horizontal box to hold the search entry and exit button
+  GtkWidget* hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_box_pack_start(GTK_BOX(box), hbox, FALSE, FALSE, 0);
+
   // Create the search entry
   GtkWidget* search_entry = gtk_entry_new();
-  gtk_box_pack_start(GTK_BOX(box), search_entry, FALSE, FALSE,
-                     0);  // pack search entry as first element from top in box
+  gtk_box_pack_start(GTK_BOX(hbox), search_entry, TRUE, TRUE, 0);
+
+  // Create the exit button
+  GtkWidget* exit_button = gtk_button_new_with_label("Exit");
+  gtk_box_pack_start(GTK_BOX(hbox), exit_button, FALSE, FALSE, 0);
+
+  // Connect the "clicked" signal of the exit button to the gtk_main_quit function
+  g_signal_connect(exit_button, "clicked", G_CALLBACK(gtk_main_quit), NULL);
 
   // Create the results list
   GtkListStore* store = gtk_list_store_new(1, G_TYPE_STRING);
@@ -191,12 +217,17 @@ void create_overlay(GtkWidget* window, std::shared_ptr<TransformationMap> txfcMa
   std::string* inputPtr = new std::string(input);
   g_object_set_data(G_OBJECT(store), "input", inputPtr);
 
+  g_object_set_data(G_OBJECT(store), "search_entry", search_entry);
+
   // Connect the "changed" signal of the search entry to the filter_results callback
   g_signal_connect(search_entry, "changed", G_CALLBACK(filter_results), store);
 
-  // g_signal_connect(tree_view, "cursor-changed", G_CALLBACK(select_transformation), store);
-  g_signal_connect(tree_view, "key-press-event", G_CALLBACK(check_enter_key), store);
+  g_signal_connect(tree_view, "key-press-event", G_CALLBACK(check_key_press), store);
 
-  // connect destroy signal to overlay_destroyed callback
-  g_signal_connect(window, "destroy", G_CALLBACK(overlay_destroyed), NULL);
+  // Create a label widget below the tree view
+  GtkWidget* label = gtk_label_new("");
+  gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
+
+  // Store a pointer to the label widget in the list store's object data
+  g_object_set_data(G_OBJECT(store), "label", label);
 }
