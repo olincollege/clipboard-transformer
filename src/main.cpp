@@ -70,36 +70,5 @@ int main(int argc, char* argv[]) {
   }
 
   start_gui(argc, argv, txfnMap, input);
-
-  // print transformations
-  if (txfnMap->size() < 1) {
-    std::cout << "no transformations found" << std::endl;
-    return 0;
-  }
-
-  // select transformation, for now just uppercase
-  Transformation* selected_txfn = (*txfnMap)["uppercase"];
-
-  if (!selected_txfn) {
-    std::cout << "no transformation selected" << std::endl;
-    return 0;
-  }
-
-  // run transformation
-  TransformationResult* output = selected_txfn->transform(&input);
-
-  // handle output
-  if (output->exitCode != 0) {
-    std::cout << "transformation failed with exit code " << output->exitCode
-              << std::endl;
-    return 1;
-  }
-
-  clip::set_text(output->output);
-
-  // free output
-  delete output;
-
-  // not freeing txfnMap because it lives as long as the program
   return 0;
 }
