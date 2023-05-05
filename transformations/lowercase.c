@@ -3,7 +3,7 @@
 
 #include "all_transformations.c"
 
-int main() {
+int main(void) {
   lowercase();
   return 0;
 }

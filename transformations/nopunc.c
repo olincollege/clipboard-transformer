@@ -3,7 +3,7 @@
 
 #include "all_transformations.h"
 
-int main() {
+int main(void) {
   nopunc();
   return 0;
 }

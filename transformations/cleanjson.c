@@ -2,4 +2,4 @@
 
 #include "all_transformations.h"
 
-int main() { return cleanjson(); }
+int main(void) { return cleanjson(); }
