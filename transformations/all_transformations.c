@@ -102,7 +102,8 @@ int cleanjson() {
       case 13:
       case 93:
       case 125:
-        if (!open_quotes) break;
+        if (open_quotes) putchar(c);
+        break;
 
       default:
         putchar(c);
