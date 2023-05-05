@@ -3,4 +3,4 @@
 
 #include "all_transformations.h"
 
-int main() { return oink(); }
+int main(void) { return oink(); }

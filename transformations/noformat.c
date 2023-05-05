@@ -2,7 +2,7 @@
 
 #include "all_transformations.h"
 
-int main() {
+int main(void) {
   noformat();
   return 0;
 }
